@@ -1,0 +1,47 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: eks-platform
+  region: us-east-1
+  version: "1.29"
+
+nodeGroups:
+  # Existing On-Demand nodegroup
+  - name: ng-general
+    instanceType: t3.small
+    desiredCapacity: 3
+    minSize: 2
+    maxSize: 5
+    volumeSize: 20
+    ssh:
+      allow: true
+      publicKeyName: mydemokeypair
+    labels:
+      role: general
+    tags:
+      project: eks-platform
+      environment: dev
+
+  # Mixed On-Demand + Spot nodegroup
+  - name: ng-mixed
+    desiredCapacity: 2
+    minSize: 1
+    maxSize: 4
+    volumeSize: 20
+    ssh:
+      allow: true
+      publicKeyName: mydemokeypair
+    instancesDistribution:
+      instanceTypes:
+        - t3.small
+        - t3a.small
+      onDemandBaseCapacity: 1
+      onDemandPercentageAboveBaseCapacity: 50
+      spotAllocationStrategy: capacity-optimized
+    labels:
+      role: mixed
+    tags:
+      project: eks-platform
+      environment: dev
+      capacity: mixed
